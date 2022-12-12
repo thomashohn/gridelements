@@ -115,7 +115,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     public function cleanupCollapsedStatesInUC()
     {
         $backendUser = $this->getBackendUser();
-        if (is_array($backendUser->uc['moduleData']['page']['gridelementsCollapsedColumns'])) {
+        if (isset($backendUser->uc['moduleData']['page']['gridelementsCollapsedColumns'])) {
             $collapsedGridelementColumns = $backendUser->uc['moduleData']['page']['gridelementsCollapsedColumns'];
             foreach ($collapsedGridelementColumns as $item => $collapsed) {
                 if (empty($collapsed)) {
@@ -212,7 +212,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             $this->setSingleColPosItems($parentObject, $colPosValues, $gridElement);
         }
         // if there are any columns, lets build the content for them
-        $outerTtContentDataArray = $parentObject->tt_contentData['nextThree'];
+        $outerTtContentDataArray = ($parentObject->tt_contentData['nextThree'] ?? []);
         if (!empty($colPosValues)) {
             $this->renderGridColumns(
                 $parentObject,
@@ -257,9 +257,9 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                             $columnKey = (int)$parserColumns['colPos'];
                             $colPosValues[$columnKey] = [
                                 'name' => htmlspecialchars($name),
-                                'allowed' => $layout['allowed'][$columnKey],
-                                'disallowed' => $layout['disallowed'][$columnKey],
-                                'maxitems' => (int)$layout['maxitems'][$columnKey],
+                                'allowed' => ($layout['allowed'][$columnKey] ?? ''),
+                                'disallowed' => ($layout['disallowed'][$columnKey] ?? ''),
+                                'maxitems' => (int)($layout['maxitems'][$columnKey] ?? 0),
                             ];
                         } else {
                             $colPosValues[32768] = [
@@ -417,7 +417,12 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             $gridContent['numberOfItems'][$colPos] = $counter;
             $this->renderSingleGridColumn($parentObject, $items, $colPos, $values, $gridContent, $row, $editUidList);
             // we will need a header for each of the columns to activate mass editing for elements of that column
-            $expanded = $this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $colPos] ? false : true;
+            if (isset($this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $colPos])) {
+                $expanded = $this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $colPos] ? false : true;
+            } else {
+                $expanded = false;
+            }
+
             $this->setColumnHeader($parentObject, $head, $colPos, $values['name'], $editUidList, $expanded);
         }
     }
@@ -605,7 +610,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
             ];
         }
 
-        $gridContent[$colPos] .= '<div class="t3-page-ce gridelements-collapsed-column-marker">' .
+        $gridContent[$colPos] = '<div class="t3-page-ce gridelements-collapsed-column-marker">' .
             $this->languageService->sL('LLL:EXT:gridelements/Resources/Private/Language/locallang_db.xml:tx_gridelements_contentcollapsed') .
             '</div>';
 
@@ -724,7 +729,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                         <div class="t3-page-ce-dropzone-available t3js-page-ce-dropzone-available"></div>
                     </div>
 					';
-                    $editUidList[$colPos] .= $editUidList[$colPos] ? ',' . $uid : $uid;
+                    $editUidList[$colPos] = ($editUidList[$colPos] ?? null) ? ',' . $uid : $uid;
                 }
             }
         }
@@ -737,7 +742,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
      */
     public function getPageLayoutController()
     {
-        return $GLOBALS['SOBE'];
+        return $GLOBALS['SOBE'] ?? GeneralUtility::makeInstance(PageLayoutController::class);
     }
 
     /**
@@ -760,7 +765,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         // Also, you may override this strict behavior via user TS Config
         // If you do so, you're on your own and cannot rely on any support by the TYPO3 core
         // We jump out here since we don't need to do the expensive loop operations
-        $allowInconsistentLanguageHandling = (bool)BackendUtility::getPagesTSconfig($parentObject->id)['mod.']['web_layout.']['allowInconsistentLanguageHandling'];
+        $allowInconsistentLanguageHandling = false;
+        if (isset(BackendUtility::getPagesTSconfig($parentObject->id)['mod.']['web_layout.']['allowInconsistentLanguageHandling'])) {
+            $allowInconsistentLanguageHandling = (bool)BackendUtility::getPagesTSconfig($parentObject->id)['mod.']['web_layout.']['allowInconsistentLanguageHandling'];
+        }
         if ($language === 0 || $language === -1 || $allowInconsistentLanguageHandling === true) {
             return false;
         }
@@ -846,9 +854,13 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         if (!$parentObject->tt_contentConfig['languageMode']) {
             $singleElementHTML .= '<div class="t3-page-ce-dragitem" id="' . StringUtility::getUniqueId() . '">';
         }
+        if (!isset($item['_ORIG_uid'])) {
+            $item['_ORIG_uid'] = '';
+        }
+
         $singleElementHTML .= $parentObject->tt_content_drawHeader(
             $item,
-            $parentObject->tt_contentConfig['showInfo'] ? 15 : 5,
+            isset($parentObject->tt_contentConfig['showInfo']) ? 15 : 5,
             $parentObject->defLangBinding,
             true,
             true
@@ -933,7 +945,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     ) {
         $head[$colPos] = $this->tt_content_drawColHeader(
             $name,
-            ($parentObject->doEdit && $editUidList[$colPos]) ? '&edit[tt_content][' . (int)$editUidList[$colPos] . ']=edit' : '',
+            ($parentObject->doEdit && ($editUidList[$colPos] ?? null)) ? '&edit[tt_content][' . (int)$editUidList[$colPos] . ']=edit' : '',
             $parentObject,
             $expanded
         );
@@ -953,7 +965,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
     {
         $iconsArr = [];
         // Create command links:
-        if ($parentObject->tt_contentConfig['showCommands']) {
+        if ($parentObject->tt_contentConfig['showCommands'] ?? null) {
             // Edit whole of column:
             if ($editParams) {
                 $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
@@ -1054,7 +1066,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 // which column should be displayed inside this cell
                 $columnKey = isset($columnConfig['colPos']) && $columnConfig['colPos'] !== '' ? (int)$columnConfig['colPos'] : 32768;
                 // first get disallowed CTypes
-                $disallowedContentTypes = $layout['disallowed'][$columnKey]['CType'];
+                $disallowedContentTypes = $layout['disallowed'][$columnKey]['CType'] ?? [];
                 if (!isset($disallowedContentTypes['*']) && !empty($disallowedContentTypes)) {
                     foreach ($disallowedContentTypes as $key => &$ctype) {
                         $ctype = $key;
@@ -1083,7 +1095,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                         $allowedContentTypes = [];
                     }
                     // get disallowed list types
-                    $disallowedListTypes = $layout['disallowed'][$columnKey]['list_type'];
+                    $disallowedListTypes = $layout['disallowed'][$columnKey]['list_type'] ?? [];
                     if (!isset($disallowedListTypes['*']) && !empty($disallowedListTypes)) {
                         foreach ($disallowedListTypes as $key => &$ctype) {
                             $ctype = htmlspecialchars($key);
@@ -1099,7 +1111,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     }
                     // when each list type is disallowed, no further list type checks are necessary
                     if (!isset($disallowedListTypes['*'])) {
-                        $allowedListTypes = $layout['allowed'][$columnKey]['list_type'];
+                        $allowedListTypes = $layout['allowed'][$columnKey]['list_type'] ?? [];
                         if (!isset($allowedListTypes['*']) && !empty($allowedListTypes)) {
                             foreach ($allowedListTypes as $listType => &$listTypeData) {
                                 // set allowed list types unless they are disallowed
@@ -1120,7 +1132,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                         $allowedListTypes = [];
                     }
                     // get disallowed grid types
-                    $disallowedGridTypes = $layout['disallowed'][$columnKey]['tx_gridelements_backend_layout'];
+                    $disallowedGridTypes = $layout['disallowed'][$columnKey]['tx_gridelements_backend_layout'] ?? [];
                     if (!isset($disallowedGridTypes['*']) && !empty($disallowedGridTypes)) {
                         foreach ($disallowedGridTypes as $key => &$ctype) {
                             $ctype = htmlspecialchars($key);
@@ -1136,7 +1148,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     }
                     // when each list type is disallowed, no further grid types checks are necessary
                     if (!isset($disallowedGridTypes['*'])) {
-                        $allowedGridTypes = $layout['allowed'][$columnKey]['tx_gridelements_backend_layout'];
+                        $allowedGridTypes = $layout['allowed'][$columnKey]['tx_gridelements_backend_layout'] ?? [];
                         if (!isset($allowedGridTypes['*']) && !empty($allowedGridTypes)) {
                             foreach ($allowedGridTypes as $gridType => &$gridTypeData) {
                                 // set allowed grid types unless they are disallowed
@@ -1160,12 +1172,17 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     $allowedContentTypes = [];
                 }
                 // render the grid cell
-                $colSpan = (int)$columnConfig['colspan'];
-                $rowSpan = (int)$columnConfig['rowspan'];
-                $maxItems = (int)$columnConfig['maxitems'];
+                $colSpan = (int)($columnConfig['colspan'] ?? null);
+                $rowSpan = (int)($columnConfig['rowspan'] ?? null);
+                $maxItems = (int)($columnConfig['maxitems'] ?? null);
                 $disableNewContent = $gridContent['numberOfItems'][$columnKey] >= $maxItems && $maxItems > 0;
                 $tooManyItems = $gridContent['numberOfItems'][$columnKey] > $maxItems && $maxItems > 0;
-                $expanded = $this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $columnKey] ? 'collapsed' : 'expanded';
+                if (isset($this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $columnKey])) {
+                    $expanded = $this->helper->getBackendUser()->uc['moduleData']['page']['gridelementsCollapsedColumns'][$row['uid'] . '_' . $columnKey] ? 'collapsed' : 'expanded';
+                } else {
+                    $expanded = 'expanded';
+                }
+
                 if (!empty($columnConfig['name']) && $columnKey === 32768) {
                     $columnHead = $this->tt_content_drawColHeader(
                         $this->languageService->sL($columnConfig['name']) . ' (' . $this->languageService->getLL('notAssigned') . ')',
@@ -1175,6 +1192,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 } else {
                     $columnHead = $head[$columnKey];
                 }
+
                 $grid .= '<td valign="top"' .
                     (isset($columnConfig['colspan']) ? ' colspan="' . $colSpan . '"' : '') .
                     (isset($columnConfig['rowspan']) ? ' rowspan="' . $rowSpan . '"' : '') .
@@ -1184,7 +1202,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     (isset($columnConfig['colspan']) && $columnConfig['colPos'] !== '' ? ' t3-grid-cell-width' . $colSpan : '') .
                     (isset($columnConfig['rowspan']) && $columnConfig['colPos'] !== '' ? ' t3-grid-cell-height' . $rowSpan : '') .
                     ($disableNewContent ? ' t3-page-ce-disable-new-ce' : '') .
-                    ($layout['horizontal'] ? ' t3-grid-cell-horizontal' : '') . ' ' . $expanded . '"' .
+                    (($layout['horizontal'] ?? null) ? ' t3-grid-cell-horizontal' : '') . ' ' . $expanded . '"' .
                     ' data-allowed-ctype="' . (!empty($allowedContentTypes) ? implode(
                         ',',
                         $allowedContentTypes

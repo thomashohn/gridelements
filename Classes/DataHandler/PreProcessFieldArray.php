@@ -64,7 +64,7 @@ class PreProcessFieldArray extends AbstractDataHandler
             $this->init($table, $id, $parentObj);
             if (!$this->getTceMain()->isImporting) {
                 $cmdId = '';
-                if (is_array($parentObj->cmdmap['tt_content'])) {
+                if (isset($parentObj->cmdmap['tt_content']) && is_array($parentObj->cmdmap['tt_content'])) {
                     $cmdId = (int)key($parentObj->cmdmap['tt_content']);
                 }
                 $new = !MathUtility::canBeInterpretedAsInteger(key($parentObj->datamap['tt_content'])) ||
@@ -268,7 +268,7 @@ class PreProcessFieldArray extends AbstractDataHandler
      */
     public function setFieldEntriesForGridContainers(array &$fieldArray)
     {
-        if ((int)$fieldArray['tx_gridelements_container'] > 0 && isset($fieldArray['colPos']) && (int)$fieldArray['colPos'] !== -1) {
+        if ((int)($fieldArray['tx_gridelements_container'] ?? null) > 0 && isset($fieldArray['colPos']) && (int)$fieldArray['colPos'] !== -1) {
             $fieldArray['colPos'] = -1;
             $fieldArray['tx_gridelements_columns'] = 0;
             $targetContainer = BackendUtility::getRecord(

@@ -61,10 +61,10 @@ class ColPosList extends AbstractItemsProcFunc
                 $params['items'] = $this->addColPosListLayoutItems(
                     $existingElement['pid'],
                     $params['items'],
-                    $existingElement['CType'],
-                    $existingElement['list_type'],
-                    $existingElement['tx_gridelements_backend_layout'],
-                    $existingElement['tx_gridelements_container']
+                    $existingElement['CType'] ?? '',
+                    $existingElement['list_type'] ?? '' ,
+                    $existingElement['tx_gridelements_backend_layout'] ?? '',
+                    $existingElement['tx_gridelements_container'] ?? 0
                 );
             }
         }
