@@ -24,6 +24,8 @@ use GridElementsTeam\Gridelements\Backend\LayoutSetup;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
+use function is_array;
+
 /**
  * Class/Function which manipulates the item-array for table/field tt_content CType.
  *
@@ -92,10 +94,10 @@ class CTypeList extends AbstractItemsProcFunc
             $layout = $this->layoutSetup->getLayoutSetup($gridElement['tx_gridelements_backend_layout']);
         }
         if (!empty($layout)) {
-            if (is_array($layout['allowed']) && is_array($layout['allowed'][$column]) && !empty($layout['allowed'][$column]['CType'])) {
+            if (isset($layout['allowed']) && is_array($layout['allowed']) && isset($layout['allowed'][$column]) && is_array($layout['allowed'][$column]) && !empty($layout['allowed'][$column]['CType'])) {
                 $allowed = $layout['allowed'][$column]['CType'];
             }
-            if (is_array($layout['disallowed']) && is_array($layout['disallowed'][$column]) && !empty($layout['disallowed'][$column]['CType'])) {
+            if (isset($layout['disallowed']) && is_array($layout['disallowed']) && isset($layout['disallowed'][$column]) && is_array($layout['disallowed'][$column]) && !empty($layout['disallowed'][$column]['CType'])) {
                 $disallowed = $layout['disallowed'][$column]['CType'];
             }
         }

@@ -259,14 +259,14 @@ class Helper implements SingletonInterface
                                 if (isset($column['disallowed.'])) {
                                     $column['disallowed'] = $column['disallowed.'];
                                 }
-                                if (!is_array($column['allowed']) && !empty($column['allowed'])) {
+                                if (isset($column['allowed']) && !is_array($column['allowed']) && !empty($column['allowed'])) {
                                     $allowed[$colPos] = ['CType' => $column['allowed']];
                                 } elseif (empty($column['allowed'])) {
                                     $allowed[$colPos] = ['CType' => '*'];
                                 } else {
                                     $allowed[$colPos] = $column['allowed'];
                                 }
-                                if ($column['allowedGridTypes']) {
+                                if ($column['allowedGridTypes'] ?? null) {
                                     $allowed[$colPos]['tx_gridelements_backend_layout'] = $column['allowedGridTypes'];
                                 }
                                 if (!empty($column['disallowed'])) {

@@ -85,7 +85,7 @@ class LayoutSetup
      */
     public function init($pageId, array $typoScriptSetup = [])
     {
-        $this->setLanguageService($GLOBALS['LANG']);
+        $this->setLanguageService();
         $pageId = (strpos($pageId, 'NEW') === 0) ? 0 : (int)$pageId;
         if ((int)$pageId < 0) {
             $pageId = Helper::getInstance()->getPidFromUid($pageId);
@@ -97,9 +97,9 @@ class LayoutSetup
             if ($columns['allowed'] || $columns['disallowed'] || $columns['maxitems']) {
                 $this->layoutSetup[$key]['columns'] = $columns;
                 unset($this->layoutSetup[$key]['columns']['allowed']);
-                $this->layoutSetup[$key]['allowed'] = $columns['allowed'] ?: [];
-                $this->layoutSetup[$key]['disallowed'] = $columns['disallowed'] ?: [];
-                $this->layoutSetup[$key]['maxitems'] = $columns['maxitems'] ?: [];
+                $this->layoutSetup[$key]['allowed'] = $columns['allowed'] ?? [];
+                $this->layoutSetup[$key]['disallowed'] = $columns['disallowed'] ?? [];
+                $this->layoutSetup[$key]['maxitems'] = $columns['maxitems'] ?? [];
             }
         }
         $this->setTypoScriptSetup($typoScriptSetup);
@@ -138,7 +138,7 @@ class LayoutSetup
                 }
 
                 // Parse icon path for records.
-                if ($item['icon']) {
+                if ($item['icon'] ?? '') {
                     $icons = explode(',', $item['icon']);
                     $item['icon'] = $icons;
                 }
@@ -223,7 +223,7 @@ class LayoutSetup
             }
 
             // Prepend icon path for records.
-            if ($item['icon']) {
+            if ($item['icon'] ?? null) {
                 $icons = explode(',', $item['icon']);
                 foreach ($icons as &$icon) {
                     $icon = '../' . $GLOBALS['TCA']['tx_gridelements_backend_layout']['ctrl']['selicon_field_path'] . '/' . htmlspecialchars(trim($icon));
@@ -315,7 +315,7 @@ class LayoutSetup
                     if (isset($column['disallowed.'])) {
                         $column['disallowed'] = $column['disallowed.'];
                     }
-                    if (!is_array($column['allowed']) && !empty($column['allowed'])) {
+                    if (!is_array($column['allowed'] ?? null) && !empty($column['allowed'])) {
                         $allowed[$colPos] = ['CType' => $column['allowed']];
                     } else {
                         if (empty($column['allowed'])) {
@@ -324,7 +324,7 @@ class LayoutSetup
                             $allowed[$colPos] = $column['allowed'];
                         }
                     }
-                    if ($column['allowedGridTypes']) {
+                    if ($column['allowedGridTypes'] ?? null) {
                         $allowed[$colPos]['tx_gridelements_backend_layout'] = $column['allowedGridTypes'];
                     }
                     if (!empty($column['disallowed'])) {
@@ -425,14 +425,14 @@ class LayoutSetup
             $container = $this->cacheCurrentParent((int)$containerId, true);
             if (!empty($container)) {
                 $containerLayout = $this->layoutSetup[$container['tx_gridelements_backend_layout']];
-                $allowed = $containerLayout['allowed'][$gridColPos]['tx_gridelements_backend_layout'];
-                $disallowed = $containerLayout['disallowed'][$gridColPos]['tx_gridelements_backend_layout'];
+                $allowed = $containerLayout['allowed'][$gridColPos]['tx_gridelements_backend_layout'] ?? [];
+                $disallowed = $containerLayout['disallowed'][$gridColPos]['tx_gridelements_backend_layout'] ?? [];
             }
         } elseif ($pageId > 0) {
             $pageLayout = Helper::getInstance()->getSelectedBackendLayout($pageId);
             if (!empty($pageLayout)) {
-                $allowed = $pageLayout['allowed'][$colPos]['tx_gridelements_backend_layout'];
-                $disallowed = $pageLayout['disallowed'][$colPos]['tx_gridelements_backend_layout'];
+                $allowed = $pageLayout['allowed'][$colPos]['tx_gridelements_backend_layout'] ?? [];
+                $disallowed = $pageLayout['disallowed'][$colPos]['tx_gridelements_backend_layout'] ?? [];
             }
         }
         foreach ($this->layoutSetup as $layoutId => $item) {
@@ -547,7 +547,7 @@ class LayoutSetup
                     $this->languageService->sL($column['name']),
                     $column['colPos'],
                     null,
-                    $column['allowed'] ? $column['allowed'] : '*',
+                    ($column['allowed'] ?? null) ? $column['allowed'] : '*',
                 ];
             }
         }
@@ -625,7 +625,7 @@ class LayoutSetup
             }
 
             $source = '';
-            if ($item['icon']) {
+            if ($item['icon'] ?? null) {
                 $fileRepository = GeneralUtility::makeInstance(FileRepository::class);
                 if (MathUtility::canBeInterpretedAsInteger($item['icon'])) {
                     $icons = [];
@@ -650,7 +650,7 @@ class LayoutSetup
                 'icon' => [$item['icon']],
                 'iconIdentifier' => $item['iconIdentifier'],
                 'tll' => $item['top_level_layout'],
-                'tt_content_defValues' => $item['tt_content_defValues.'],
+                'tt_content_defValues' => $item['tt_content_defValues.'] ?? '',
             ];
         }
 
@@ -668,7 +668,7 @@ class LayoutSetup
     {
         $layoutSetup = $this->getLayoutSetup($layoutId);
         // Get flexform file from pi_flexform_ds if pi_flexform_ds_file not set and "FILE:" found in pi_flexform_ds for backward compatibility.
-        if ($layoutSetup['pi_flexform_ds_file']) {
+        if ($layoutSetup['pi_flexform_ds_file'] ?? null) {
             $flexformConfiguration = GeneralUtility::getUrl(GeneralUtility::getFileAbsFileName($layoutSetup['pi_flexform_ds_file']));
         } elseif (strpos($layoutSetup['pi_flexform_ds'], 'FILE:') === 0) {
             $flexformConfiguration = GeneralUtility::getUrl(GeneralUtility::getFileAbsFileName(substr(

@@ -55,7 +55,7 @@ class TtContentFlexForm
                 /** @var LayoutSetup $layoutSetupInstance */
                 $layoutSetupInstance = GeneralUtility::makeInstance(LayoutSetup::class)->init($pageUid);
                 $layoutSetup = $layoutSetupInstance->getLayoutSetup($layoutId);
-                if ($layoutSetup['pi_flexform_ds_file']) {
+                if ($layoutSetup['pi_flexform_ds_file'] ?? null) {
                     if (MathUtility::canBeInterpretedAsInteger($layoutSetup['pi_flexform_ds_file'])) {
                         // Our data structure is in a record. Re-use core internal syntax to resolve that.
                         // Get path of referenced file
