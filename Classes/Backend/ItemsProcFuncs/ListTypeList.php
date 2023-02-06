@@ -95,7 +95,7 @@ class ListTypeList extends AbstractItemsProcFunc
             if (is_array($layout['allowed']) && is_array($layout['allowed'][$column]) && !empty($layout['allowed'][$column]['list_type'])) {
                 $allowed = $layout['allowed'][$column]['list_type'];
             }
-            if (is_array($layout['disallowed']) && is_array($layout['disallowed'][$column]) && !empty($layout['disallowed'][$column]['list_type'])) {
+            if (is_array($layout['disallowed'] ?? null) && is_array($layout['disallowed'][$column] ?? null) && !empty($layout['disallowed'][$column]['list_type'] ?? null)) {
                 $disallowed = $layout['disallowed'][$column]['list_type'];
             }
         }

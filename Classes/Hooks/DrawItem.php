@@ -150,7 +150,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         if ($row['CType']) {
             $this->showHidden = $parentObject->tt_contentConfig['showHidden'] ? true : false;
 
-            if ($this->helper->getBackendUser()->uc['hideContentPreview']) {
+            if ($this->helper->getBackendUser()->uc['hideContentPreview'] ?? false) {
                 $itemContent = '';
                 $drawItem = false;
             }
