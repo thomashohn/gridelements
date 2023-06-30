@@ -426,7 +426,10 @@ class DatabaseRecordList extends \TYPO3\CMS\Recordlist\RecordList\DatabaseRecord
                     $backendUser->writeUC($backendUser->uc);
                     $returnUrl = GeneralUtility::sanitizeLocalUrl(GeneralUtility::_GP('returnUrl'));
                     if ($returnUrl !== '') {
-                        HttpUtility::redirect($returnUrl);
+                        // Replaced HttpUtility::redirect($returnUrl) with actual code
+                        header(HttpUtility::HTTP_STATUS_303);
+                        header('Location: ' . GeneralUtility::locationHeaderUrl($returnUrl));
+                        exit;
                     }
                 }
             }
