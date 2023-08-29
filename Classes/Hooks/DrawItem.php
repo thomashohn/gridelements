@@ -785,7 +785,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                 }
             }
             // Check whether we have a mix of both
-            if ($this->languageHasTranslationsCache[$language]['hasStandAloneContent']
+            if (($this->languageHasTranslationsCache[$language]['hasStandAloneContent'] ?? false)
                 && $this->languageHasTranslationsCache[$language]['hasTranslations']
             ) {
                 /** @var FlashMessage $message */
@@ -856,6 +856,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         }
         if (!isset($item['_ORIG_uid'])) {
             $item['_ORIG_uid'] = '';
+        }
+        // If not set - set prev toi false to array key doesn't exist in PageLayoutView
+        if (!isset($parentObject->tt_contentData['prev'][$item['uid']])) {
+            $parentObject->tt_contentData['prev'][$item['uid']] = false;
         }
 
         $singleElementHTML .= $parentObject->tt_content_drawHeader(
@@ -1229,7 +1233,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
                     ) . '"' : '') .
                     (!empty($maxItems) ? ' data-maxitems="' . $maxItems . '"' : '') .
                     ' data-state="' . $expanded . '">';
-                $grid .= ($this->helper->getBackendUser()->uc['hideColumnHeaders'] ? '' : $columnHead);
+                $grid .= (($this->helper->getBackendUser()->uc['hideColumnHeaders'] ?? false) ? '' : $columnHead);
                 if ($maxItems > 0) {
                     $maxItemsClass = ($disableNewContent ? ' warning' : ' success');
                     $maxItemsClass = ($tooManyItems ? ' danger' : $maxItemsClass);
