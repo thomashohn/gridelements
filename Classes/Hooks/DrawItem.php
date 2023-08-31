@@ -857,7 +857,7 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         if (!isset($item['_ORIG_uid'])) {
             $item['_ORIG_uid'] = '';
         }
-        // If not set - set prev toi false to array key doesn't exist in PageLayoutView
+        // If not set - set prev to false, since there is not check in core class PageLayoutView for key existence
         if (!isset($parentObject->tt_contentData['prev'][$item['uid']])) {
             $parentObject->tt_contentData['prev'][$item['uid']] = false;
         }
