@@ -861,6 +861,10 @@ class DrawItem implements PageLayoutViewDrawItemHookInterface, SingletonInterfac
         if (!isset($parentObject->tt_contentData['prev'][$item['uid']])) {
             $parentObject->tt_contentData['prev'][$item['uid']] = false;
         }
+        // If not set - set next to false, since there is not check in core class PageLayoutView for key existence
+        if (!isset($parentObject->tt_contentData['next'][$item['uid']])) {
+            $parentObject->tt_contentData['next'][$item['uid']] = false;
+        }
 
         $singleElementHTML .= $parentObject->tt_content_drawHeader(
             $item,
