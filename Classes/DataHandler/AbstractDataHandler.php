@@ -335,6 +335,7 @@ abstract class AbstractDataHandler
             );
 
             if (isset($updateArray['tx_gridelements_container']) &&
+                isset($containerUpdateArray[$translatedElement['tx_gridelements_container']]) &&
                 $translatedElement['tx_gridelements_container'] !== $updateArray['tx_gridelements_container']) {
                 $containerUpdateArray[$translatedElement['tx_gridelements_container']] -= 1;
                 $containerUpdateArray[$updateArray['tx_gridelements_container']] += 1;
