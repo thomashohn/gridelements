@@ -226,31 +226,34 @@ class AfterDatabaseOperations extends AbstractDataHandler
             $backendLayoutNextLevelUid = 0;
             $rootline = BackendUtility::BEgetRootLine($this->getPageUid());
             for ($i = count($rootline); $i > 0; $i--) {
-                $page = BackendUtility::getRecord(
-                    'pages',
-                    (int)$rootline[$i]['uid'],
-                    'uid,backend_layout,backend_layout_next_level'
-                );
-                $selectedBackendLayoutNextLevel = (int)$page['backend_layout_next_level'];
-                if ($page['uid'] === $this->getPageUid()) {
-                    if ($fieldArray['backend_layout_next_level'] !== 0) {
-                        // Backend layout for sub pages of the current page is set
-                        $backendLayoutNextLevelUid = (int)$fieldArray['backend_layout_next_level'];
-                    }
-                    if ($fieldArray['backend_layout'] !== 0) {
-                        // Backend layout for current page is set
-                        $backendLayoutUid = $fieldArray['backend_layout'];
-                        break;
-                    }
-                } else {
-                    if ($selectedBackendLayoutNextLevel === -1 && $page['uid'] !== $this->getPageUid()) {
-                        // Some previous page in our rootline sets layout_next to "None"
-                        break;
-                    }
-                    if ($selectedBackendLayoutNextLevel > 0 && $page['uid'] !== $this->getPageUid()) {
-                        // Some previous page in our rootline sets some backend_layout, use it
-                        $backendLayoutUid = $selectedBackendLayoutNextLevel;
-                        break;
+                // Added check for if $rootline[$i]['uid'] is set
+                if (isset($rootline[$i]['uid'])) {
+                    $page = BackendUtility::getRecord(
+                        'pages',
+                        (int)$rootline[$i]['uid'],
+                        'uid,backend_layout,backend_layout_next_level'
+                    );
+                    $selectedBackendLayoutNextLevel = (int)$page['backend_layout_next_level'];
+                    if ($page['uid'] === $this->getPageUid()) {
+                        if ($fieldArray['backend_layout_next_level'] !== 0) {
+                            // Backend layout for sub pages of the current page is set
+                            $backendLayoutNextLevelUid = (int)$fieldArray['backend_layout_next_level'];
+                        }
+                        if ($fieldArray['backend_layout'] !== 0) {
+                            // Backend layout for current page is set
+                            $backendLayoutUid = $fieldArray['backend_layout'];
+                            break;
+                        }
+                    } else {
+                        if ($selectedBackendLayoutNextLevel === -1 && $page['uid'] !== $this->getPageUid()) {
+                            // Some previous page in our rootline sets layout_next to "None"
+                            break;
+                        }
+                        if ($selectedBackendLayoutNextLevel > 0 && $page['uid'] !== $this->getPageUid()) {
+                            // Some previous page in our rootline sets some backend_layout, use it
+                            $backendLayoutUid = $selectedBackendLayoutNextLevel;
+                            break;
+                        }
                     }
                 }
             }
